@@ -1,0 +1,56 @@
+<html>
+	<head> 
+		<title>FDC File Editor</title>
+	</head>
+	<style type="text/css">
+		#container {
+			width: 90%;
+			overflow:scroll;
+			padding: 20px;
+		}
+		.button {
+			float: left;
+			padding: 10px;
+			border-radius: 3px;
+			background-color: rgb(150, 220, 240);
+			cursor: pointer;
+			margin: 20px;
+		}
+		.button:hover {
+			background-color: rgb(100, 180, 200);
+		}
+		.clear {
+			clear: both;
+		}
+	</style>
+	<script src="classes.js"></script>
+	<script src="canvas.js"></script>
+	<script type="text/javascript">
+		image = null;
+		function init() {
+			initCanvas('mycanvas', 600);
+		}
+		function readURL(input) {
+			if (input.files && input.files[0]) {
+    			var reader = new FileReader();
+    			reader.onload = function (e) {
+    				image = new Image();
+    				image.src = e.target.result;
+    			}
+    			reader.readAsDataURL(input.files[0]);
+    		}
+		}
+	</script>
+	<body onload='init()'>
+		<div id='toolbox'>
+			<div class='button' onclick='addBlockMode()'>ADD</div>
+			<div class='button' onclick='deleteBlockMode()' id='delete'>DELETE</div>
+			<input type='file' id='file' style='display: none;' onchange='readURL(this)'/>
+			<div class='clear'></div>
+		</div>
+		<div id='container'>
+			<canvas id='mycanvas'> </canvas>
+		</div>
+		<p id='timer'></p>
+	</body>
+</html>

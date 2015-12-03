@@ -13,6 +13,16 @@ ImageBlock.prototype.checkOverlap = function(t) {
 	else if(t > this.start_time && t < this.end_time) return MIDLE;
 	else return NO_OVERLAP;
 }
+ImageBlock.prototype.getIndex = function(d) {
+	var s = '';
+	var index = this.index;
+	for(var i = 0; i < d; i++) {
+		s += String.fromCharCode(65 + index%26);
+		index = Math.floor(index/26);
+	}
+	return s.split("").reverse().join("");
+}
+
 
 function BlockList() {
 	this.a = [];
@@ -100,4 +110,10 @@ BlockList.prototype.checkOverlap = function() {
 		}
 	}
 	return false;
+}
+BlockList.prototype.setAllFormats = function() {
+	for(var i = 0; i < this.a.length; i++) {
+		this.a[i].index = i;
+		this.a[i].format = getFormatString(this.a[i]);
+	}
 }

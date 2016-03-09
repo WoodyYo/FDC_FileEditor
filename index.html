@@ -5,8 +5,15 @@
 	<style type="text/css">
 		#container {
 			width: 90%;
+			height: 180px;
 			overflow:scroll;
 			padding: 20px;
+			position: relative;
+		}
+		#container canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
 		}
 		.button {
 			float: left;
@@ -22,35 +29,49 @@
 		.clear {
 			clear: both;
 		}
+		#cur-img {
+			width: 200px;
+			height: 200px;
+		}
 	</style>
 	<script src="classes.js"></script>
 	<script src="canvas.js"></script>
+	<script src="audio.js"></script>
 	<script type="text/javascript">
-		image = null;
-		function init() {
-			initCanvas('mycanvas', 600);
-		}
+		file = null;
+		url = '';
 		function readURL(input) {
 			if (input.files && input.files[0]) {
     			var reader = new FileReader();
-    			reader.onload = function (e) {
-    				image = new Image();
-    				image.src = e.target.result;
-    			}
-    			reader.readAsDataURL(input.files[0]);
+    			file = input.files[0];
+    			url = input.value;
     		}
 		}
+		function readMusic(input) {
+			var reader = new FileReader();
+			reader.onload = function (e) {
+			   	var audio = document.getElementById('myaudio');
+			   	audio.src = e.target.result;
+			}
+		    reader.readAsDataURL(input.files[0]);
+		}
 	</script>
-	<body onload='init()'>
+	<body onload='initAudio()' onContextMenu='return false;'>
+		<audio id="myaudio"></audio>
 		<div id='toolbox'>
 			<div class='button' onclick='addBlockMode()'>ADD</div>
 			<div class='button' onclick='deleteBlockMode()' id='delete'>DELETE</div>
+			<div id='play-btn' class='button' onclick='clickPlay()'>PLAY</div>
 			<input type='file' id='file' style='display: none;' onchange='readURL(this)'/>
+			<input type='file' id='music' onchange='readMusic(this)'/>
 			<div class='clear'></div>
 		</div>
 		<div id='container'>
 			<canvas id='mycanvas'> </canvas>
+			<canvas id='audio-canvas'> </canvas>
 		</div>
-		<p id='timer'></p>
+		<p id='timer'>0:00</p>
+		<p id='audio-timer'>0:00</p>
+		<img id='cur-img'></img>
 	</body>
 </html>

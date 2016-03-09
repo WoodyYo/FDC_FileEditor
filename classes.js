@@ -1,5 +1,15 @@
-function ImageBlock(img, start_time) {
-	this.img = img;
+function ImageBlock(file, url, start_time) {
+	this.file = file;
+	this.url = url;
+	var reader = new FileReader();
+	(function(reader, block) {
+		reader.onload = function (e) {
+	    	block.img = new Image();
+	    	block.img.src = e.target.result;
+	    }
+	})(reader, this);
+    reader.readAsDataURL(file);
+
 	this.start_time = start_time;
 	this.tmp_start = start_time;
 	this.end_time= start_time;

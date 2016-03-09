@@ -1,22 +1,30 @@
 var width;
 var height = 100;
-var step = 15; // 10 px a second.
+var step = 15; // 15 px a second.
 var canvas, ctx;
 var fulltime;
 var timer;
 var container;
 var list = new BlockList();
 var mem_bg;
+var file;
+var url;
+var a_canvas, a_ctx;
+var a_mem_bg;
+
 function initCanvas(id, time) {
 	fulltime = time;
 	canvas = document.getElementById(id);
+	a_canvas = document.getElementById('audio-canvas');
 	ctx = canvas.getContext('2d');
-	canvas.width = width = time*step;
-	canvas.height = height+40; //50px for time line
+	a_ctx = a_canvas.getContext('2d');
+	canvas.width = a_canvas.width = width = time*step;
+	canvas.height = a_canvas.height = height+40; //50px for time line
 	timer = document.getElementById('timer');
 	container = document.getElementById('container');
 	drawBackGround();
 	mem_bg = ctx.getImageData(0, 0, width, height+5);
+	a_mem_bg = a_ctx.getImageData(0, 0, 30, height+5);
 	drawAllBLocks();
 	canvasEventsSetup();
 }
@@ -87,7 +95,7 @@ var oldX;
 
 function addBlockMode() {
 	mode = ADD;
-	canvas.style.cursor = 'pointer';
+	a_canvas.style.cursor = 'pointer';
 	if(list.selected_r != 0) {
 		list.clearSelected();
 		resetAll();
@@ -98,7 +106,7 @@ function addBlockMode() {
 function deleteBlockMode() {
 	if(mode == DEL) {
 		mode = NOTHING;
-		canvas.style.cursor = 'auto';
+		a_canvas.style.cursor = 'auto';
 		document.getElementById('delete').style.backgroundColor = 'rgb(150, 220, 240)';
 	}
 	else {
@@ -107,13 +115,13 @@ function deleteBlockMode() {
 			resetAll();
 		}
 		mode = DEL;
-		canvas.style.cursor = 'not-allowed';
+		a_canvas.style.cursor = 'not-allowed';
 		document.getElementById('delete').style.backgroundColor = 'rgb(100, 180, 200)';
 	}
 }
 
 function canvasEventsSetup() {
-	canvas.onmousemove = function(e) {
+	a_canvas.onmousemove = function(e) {
 		var x = getPos(e, canvas).x;
 		var s = secToText(Math.floor(x/step));
 		timer.innerHTML = s;
@@ -143,15 +151,19 @@ function canvasEventsSetup() {
 		else {
 			var info = list.find(x/step);
 			if(info.index != -1) {
-				if(info.state == MIDLE) canvas.style.cursor = 'move';
-				else canvas.style.cursor = 'e-resize';
+				if(info.state == MIDLE) a_canvas.style.cursor = 'move';
+				else a_canvas.style.cursor = 'e-resize';
 			}
-			else canvas.style.cursor = 'auto';
+			else a_canvas.style.cursor = 'auto';
 		}
 	}
-	canvas.onmousedown = function(e) {
+	a_canvas.onmousedown = function(e) {
 		var p = getPos(e, canvas);
 		var x = p.x, y = p.y;
+		if(e.which == 3) {
+			playAtTime(x/step);
+			return;
+		}
 		if(mode == DEL) {
 			info = list.find(x/step);
 			if(info.index != -1) {
@@ -162,7 +174,7 @@ function canvasEventsSetup() {
 		else {			
 			oldX = x;
 			var info;
-			if(mode == ADD) info = {index: list.push(new ImageBlock(image, x/step)), state: END};
+			if(mode == ADD) info = {index: list.push(new ImageBlock(file, url, x/step)), state: END};
 			else info = list.find(x/step);
 			if(y < height && info.index != -1) {
 				dragging = true;
@@ -176,7 +188,7 @@ function canvasEventsSetup() {
 					}
 				}
 				else {
-					canvas.style.cursor = 'e-resize';
+					a_canvas.style.cursor = 'e-resize';
 					list.selectSingle(info.index);
 					if(info.state == START) mode = SCALE_LEFT;
 					else mode = SCALE_RIGHT;
@@ -189,8 +201,28 @@ function canvasEventsSetup() {
 			}
 		}
 	}
-	canvas.onmouseup = function(e) {
+	a_canvas.onmouseup = function(e) {
 		dragging = false;
 		if(mode == SHIFT) list.sort();
 	}
+}
+
+var last_x = -1;
+var last_index = -1;
+function drawCurTime(time) {
+	var x = parseInt(time*step);
+	if(last_x != 0) a_ctx.putImageData(a_mem_bg, last_x-5, 0);
+	last_x = x;
+	a_ctx.strokeStyle = 'yellow';
+	a_ctx.beginPath();
+    a_ctx.moveTo(x, 0);
+    a_ctx.lineTo(x, height);
+    a_ctx.stroke();
+    var t = list.find(time);
+    if(last_index == t.index) return;
+    if(t.index != -1) {
+    	document.getElementById('cur-img').src = list.a[t.index].img.src;
+	}
+	else document.getElementById('cur-img').src = '';
+	last_index = t.index;
 }
